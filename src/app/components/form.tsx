@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import Image from "next/image";
 
 function HanForm() {
@@ -14,6 +14,7 @@ function HanForm() {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [amountPerPerson, setAmountPerPerson] = useState(0);
+
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
@@ -157,6 +158,9 @@ function HanForm() {
           <option defaultValue={"true"} id="1" value={"1"}>
             หารเท่าๆกัน
           </option>
+          <option id="2" value={"3"}>
+            หารแบบกำหนดเอง
+          </option>
           <option id="2" value={"2"}>
             Russian roulete
           </option>
@@ -244,14 +248,9 @@ function HanForm() {
         <div className="modal-box flex flex-col items-center">
           <h3 className="font-bold text-2xl text-center">สแกนเลยจ้า</h3>
           <div className="py-4">
-            {!loading ? <div className=" skeleton w-56 h-56"></div> : <></>}
-            <Image
-              src={qrLink}
-              alt={"qrcode"}
-              width={500}
-              height={500}
-              onLoadingComplete={() => setLoading(true)}
-            />
+            <Suspense fallback={<div className=" skeleton w-56 h-56"></div>}>
+              <Image src={qrLink} alt={"qrcode"} width={500} height={500} />
+            </Suspense>
           </div>
           <div className="pb-2 flex flex-col gap-2 items-center">
             <span className="text-xl">ยอดรวม: {amount + " บาท"}</span>
@@ -274,34 +273,28 @@ function HanForm() {
           </span>
           <p className="text-red-500">***ห้ามปิดจนกว่าจะ Scan ครบทุกคน</p>
           <div className="py-4 overflow-y-scroll">
-            {
-              //show qrcode array
-              qrLinkArray.map((link, index) => {
+            <Suspense fallback={<div className="skeleton w-56 h-56"></div>}>
+              {qrLinkArray.map((link, index) => {
                 return (
                   <div
                     key={index}
-                    className=" flex flex-col items-center gap-4 py-5"
+                    className="flex flex-col items-center gap-4 py-5"
                   >
-                    <span className="text-xl">
-                      {" "}
-                      ผู้โชคดีรายที่ {index + 1}{" "}
-                    </span>
-                    {!loading ? (
-                      <div className=" skeleton w-56 h-56"></div>
+                    <span className="text-xl">ผู้โชคดีรายที่ {index + 1}</span>
+                    {!link ? ( // Assuming link is falsy while data is loading
+                      <div className="skeleton w-56 h-56"></div>
                     ) : (
-                      <></>
+                      <Image
+                        src={link}
+                        alt={"qrcode"}
+                        width={500}
+                        height={500}
+                      />
                     )}
-                    <Image
-                      src={link}
-                      alt={"qrcode"}
-                      width={500}
-                      height={500}
-                      onLoadingComplete={() => setLoading(true)}
-                    />
                   </div>
                 );
-              })
-            }
+              })}
+            </Suspense>
           </div>
           <div className="modal-action">
             <form method="dialog">
