@@ -1,9 +1,9 @@
 "use client";
 
-import { FormEvent, Suspense, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import Image from "next/image";
-
-function HanForm() {
+import MobileDetect from "mobile-detect";
+const HanForm = () => {
   const [qrLink, setQrLink] = useState<string>(""); // for option 1
   const [qrLinkArray, setQrLinkArray] = useState<string[]>([]); //for option 2 [
   const [option, setOption] = useState("1"); // 1 = หารเท่าๆกัน, 2 = Russian roulete
@@ -14,6 +14,7 @@ function HanForm() {
   const [loading, setLoading] = useState(false);
   const [amount, setAmount] = useState(0);
   const [amountPerPerson, setAmountPerPerson] = useState(0);
+  const md = new MobileDetect(window.navigator.userAgent);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -42,6 +43,7 @@ function HanForm() {
         return;
       }
       //get qrcode
+      //option 1
       if (option === "1") {
         setAmount(parseInt(amount));
         amount = parseInt(amount) / people;
@@ -49,7 +51,9 @@ function HanForm() {
         const url = `https://promptpay.io/${telid}/${amount.toString()}`;
         setQrLink(url);
         (document.getElementById("qrcode") as HTMLDialogElement)?.showModal();
-      } else if (option === "2") {
+      }
+      // option 2
+      else if (option === "2") {
         let leverageAmount = 5;
         if (leverage !== "") {
           leverageAmount = parseInt(leverage);
@@ -97,8 +101,43 @@ function HanForm() {
       }
     }
   };
+  useEffect(() => {
+    document.getElementById("agent")?.append(window.navigator.userAgent);
+  });
   return (
     <>
+      {md.os() == "iPadOS" ||
+      md.is("iPad") ||
+      md.match("Macintosh; Intel Mac OS X") ? (
+        <div className="alert lg:w-1/2" id="info">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            className="stroke-info shrink-0 w-6 h-6"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+            ></path>
+          </svg>
+          <span>สำหรับคนใช้ iPad ให้อัพเดท IOS เป็น version ล่าสุด</span>
+          <div>
+            <button
+              className="btn btn-sm"
+              onClick={() => {
+                document.getElementById("info")?.remove();
+              }}
+            >
+              ปิด
+            </button>
+          </div>
+        </div>
+      ) : (
+        <></>
+      )}
       <form
         className="form-control w-full max-w-xs"
         onSubmit={onSubmit}
@@ -202,7 +241,7 @@ function HanForm() {
         <label className="label">
           <span className="label-text text-gray-500">หารกี่คน?</span>
         </label>
-        <div className="join w-12/12 md:w-3/4 items-center justify-center shadow-sm">
+        <div className="join w-12/12 md:w-4/4 items-center justify-center shadow-md">
           <button
             className="btn join-item bg-indigo-100 border-0"
             onClick={(e) => {
@@ -305,6 +344,6 @@ function HanForm() {
       </dialog>
     </>
   );
-}
+};
 
 export default HanForm;
