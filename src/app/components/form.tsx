@@ -7,16 +7,17 @@ import Tab1 from "./tab1";
 import Tab2 from "./tab2";
 const HanForm = () => {
   const [tab, setTab] = useState(1);
-  const md = new MobileDetect(window.navigator.userAgent);
-
+  const [md, setMd] = useState<any>(null);
   useEffect(() => {
-    document.getElementById("agent")?.append(window.navigator.userAgent);
-  });
+    setMd(new MobileDetect(window.navigator.userAgent));
+  }, []);
+
   return (
     <>
-      {md.os() == "iPadOS" ||
-      md.is("iPad") ||
-      md.match("Macintosh; Intel Mac OS X") ? (
+      {md &&
+      (md.os() == "iPadOS" ||
+        md.is("iPad") ||
+        md.match("Macintosh; Intel Mac OS X")) ? (
         <div className="alert lg:w-1/2" id="info">
           <svg
             xmlns="http://www.w3.org/2000/svg"
